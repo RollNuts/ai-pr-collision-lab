@@ -2,26 +2,24 @@
 
 > **Historical hosted demo.** The project-hosted Veripsa GitHub App has been
 > suspended since **2026-08-18**. Installing the App will not currently produce
-> checks or comments. The installation and hosted walkthrough below describe the
-> historical workflow. You can still run this fixture locally; for local signal
+> checks or comments. The recording below documents the historical workflow.
+> You can still run this fixture locally; for local signal
 > evaluation, see [Veripsa Core offline evaluation](https://github.com/RollNuts/veripsa#offline-evaluation).
 
-A small, deliberately boring Python order-pricing service used by the
-[Veripsa guided walkthrough](https://veripsa.com/try). It lets you see a real
-Veripsa Core check on two open pull requests that need collision or landing-order
-attention, without touching a repository you care about.
+A small Python order-pricing service used for a historical Veripsa demo of two
+pull requests that overlap in the same pricing code. The recording shows the
+past GitHub check and comment; local tests let you inspect the fixture today.
 
 ## Start here
 
 | Need | Link |
 | --- | --- |
-| Guided walkthrough with copy buttons | <https://veripsa.com/try> |
-| Collision walkthrough and real output | <https://veripsa.com/collision> |
-| Install Veripsa Core | <https://veripsa.com/go/install?source=sandbox_readme> |
-| Canonical fixture manifest | [`demo-manifest.json`](./demo-manifest.json) |
+| Run the pricing tests | [Run locally](#run-locally) |
+| Reproduce the prepared scenarios | [Current canonical fixture guidance](#reproduce-both-scenarios) |
+| Historical check and comment recording | [Recorded public run](#recorded-public-run) |
+| This fork's legacy fixture manifest | [`demo-manifest.json`](./demo-manifest.json) |
 | Public integration contract v1.0.0 | <https://github.com/GetVeripsa/veripsa-webhook-spec/tree/v1.0.0> |
 | Data handling and retention | [`DATA_HANDLING.md`](./DATA_HANDLING.md) |
-| Agent usage guide | <https://veripsa.com/docs/with-agents> |
 
 ## What is in this repository
 
@@ -31,10 +29,10 @@ attention, without touching a repository you care about.
 - `demo-manifest.json` — the machine-readable authority for fixture branches,
   their shared base, expected changed paths, tests, recorded-run metadata, and
   compatible public-contract version.
-- `scripts/verify_fixtures.py` — verifies the long-lived branches against that
-  manifest from a full clone.
+- `scripts/verify_fixtures.py` — the legacy verifier for the scenario branches;
+  those branch refs are not included in this fork.
 
-Two prepared long-lived branches:
+Two historical scenario branches (see [current reproduction guidance](#reproduce-both-scenarios)):
 
 | Branch | Pretend author | Purpose |
 | --- | --- | --- |
@@ -44,7 +42,7 @@ Two prepared long-lived branches:
 Each branch is small and passes its tests independently. Both must keep the
 recorded fixture base
 `03f70bef401b65e0c275c8b34cf9fc6d83f85379`, and each must differ from it only
-in `orders/pricing.py` and `tests/test_pricing.py`. CI checks those invariants;
+in `orders/pricing.py` and `tests/test_pricing.py`. The legacy verifier checks those invariants when both branch refs are present;
 README prose is not the fixture authority.
 
 ## Recorded public run
@@ -69,90 +67,44 @@ contract. Human sentence copy may evolve. Integrations should consume the
 current machine contract instead of parsing prose from the recording. The
 capture does not assert that either change is correct or safe to merge.
 
-## Walkthrough
+## Run locally
 
-### 1. Fork this repository with all branches
-
-The two scenario branches must come along:
-
-- Web UI: on the fork page, **uncheck** "Copy the `main` branch only".
-- CLI: `gh repo fork GetVeripsa/ai-pr-collision-lab --clone` copies all branches
-  by default and clones your fork in one step.
-
-If your fork contains only `main`, delete it and fork again with all branches.
-
-### 2. Install Veripsa Core on your fork (historical; hosted service suspended)
-
-Install from
-[veripsa.com/go/install](https://veripsa.com/go/install?source=sandbox_readme),
-choose **Only select repositories**, and select your fork. Veripsa runs on the
-repository where it is installed, not on this upstream repository. No sign-up
-or credit card is required for the current early-access flow.
-
-Give the initial ingest a moment before opening the PRs; a brand-new install can
-briefly report `Unknown` while its repository view is becoming current.
-
-### 3. Open both prepared PRs on your fork
-
-From a clone of your fork:
+This is a historical fork. Its `main` branch has the small pricing service and
+unit tests, but does not contain the scenario branches or the newer fixture
+materializer. To run the service tests without installing a GitHub App:
 
 ```sh
-FORK="$(gh api user -q .login)/ai-pr-collision-lab"
-gh pr create --repo "$FORK" --base main --head collide-a \
-  --title "Demo scenario A" --body "Prepared Veripsa sandbox scenario A."
-gh pr create --repo "$FORK" --base main --head collide-b \
-  --title "Demo scenario B" --body "Prepared Veripsa sandbox scenario B."
+python3 -m venv .venv
+. .venv/bin/activate
+python3 -m pip install -e '.[test]'
+python3 -m pytest -q
+python3 scripts/check_docs.py
 ```
 
-The `--repo` flag matters. Without it, a fork clone can default to this upstream
-repository. PRs opened upstream are invisible to an App installation on your
-fork, so the expected checks will not appear there.
+The pricing tests exercise the local Python fixture. They do not produce a
+Veripsa check or validate the hosted service.
 
-### 4. Read the GitHub surfaces
+## Reproduce both scenarios
 
-Each covered PR gets one check named exactly `Veripsa`. Read its title, summary,
-and—when present—the single managed PR comment. Then use **Details** for the
-short explanation behind the signal.
+The canonical repository has moved from long-lived `collide-a` / `collide-b`
+branches to the annotated tags `fixture-v1-agent-a` / `fixture-v1-agent-b`.
+Its newer manifest and scripts verify the tags and materialize scenario branches
+in a fork you control. Use the
+[canonical scenario instructions](https://github.com/GetVeripsa/ai-pr-collision-lab#the-two-prepared-scenarios)
+and [materializer](https://github.com/GetVeripsa/ai-pr-collision-lab/blob/main/scripts/materialize_fixtures.py)
+from a fresh clone of that repository. The legacy `scripts/verify_fixtures.py`
+in this fork expects the old branch names and cannot verify scenarios that are
+absent here. Do not delete a fork to try to restore those removed branches.
 
-The four base traffic signals are **Clear**, **Heads up**, **Wait in line**, and
-**Unknown**. A material coupling can add **Paused (acknowledge to proceed)** as
-an `action_required` control overlay; Paused is not a fifth base verdict. It
-holds a merge only when repository branch protection or a ruleset makes the
-Veripsa check required.
+The hosted installation and check-rendering steps in older walkthroughs are
+historical while the service remains suspended. Local fixture tests and tag
+verification remain useful without an App installation. For evaluating the
+structural signal on your own repository, use
+[Veripsa Core offline evaluation](https://github.com/RollNuts/veripsa#offline-evaluation).
 
-Clear is not merge approval or correctness proof. Unknown is not Clear.
-`veripsa-ack` records an explicit proceed decision for one surfaced coupling; it
-is not setup, a routine agent action, or a review approval.
-
-### 5. Evaluate on a repository you maintain
-
-The sandbox demonstrates the public check/comment shape. Install on a repository
-you actually work in and observe real PR traffic before changing merge policy.
-
-## Run and verify the fixture
-
-Install the declared test dependency and run the main tests plus documentation
-parity:
-
-```sh
-python -m pip install -e '.[test]'
-python -m pytest -q
-python scripts/check_docs.py
-```
-
-From a full clone, verify the long-lived branches, exact merge base, exact diff
-scope, and each branch's independent test result:
-
-```sh
-git fetch origin main collide-a collide-b
-python scripts/verify_fixtures.py
-```
-
-Forking or cloning this static repository sends nothing to Veripsa. Data reaches
-Veripsa Core only after you install the GitHub App on a repository you control.
-The App may read file/diff data transiently to derive its advisory, but it does
-not retain or display source-file bodies or diff bodies. See
-[`DATA_HANDLING.md`](./DATA_HANDLING.md) for the boundary.
+Forking, cloning, and testing this static repository sends nothing to Veripsa.
+[`DATA_HANDLING.md`](./DATA_HANDLING.md) documents the historical App data
+boundary; it is not an availability notice for a hosted service.
 
 ## License
 
