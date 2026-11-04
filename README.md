@@ -1,5 +1,11 @@
 # ai-pr-collision-lab
 
+> **Historical hosted demo.** The project-hosted Veripsa GitHub App has been
+> suspended since **2026-08-18**. Installing the App will not currently produce
+> checks or comments. The installation and hosted walkthrough below describe the
+> historical workflow. You can still run this fixture locally; for local signal
+> evaluation, see [Veripsa Core offline evaluation](https://github.com/RollNuts/veripsa#offline-evaluation).
+
 A small, deliberately boring Python order-pricing service used by the
 [Veripsa guided walkthrough](https://veripsa.com/try). It lets you see a real
 Veripsa Core check on two open pull requests that need collision or landing-order
@@ -75,7 +81,7 @@ The two scenario branches must come along:
 
 If your fork contains only `main`, delete it and fork again with all branches.
 
-### 2. Install Veripsa Core on your fork
+### 2. Install Veripsa Core on your fork (historical; hosted service suspended)
 
 Install from
 [veripsa.com/go/install](https://veripsa.com/go/install?source=sandbox_readme),
