@@ -1,79 +1,23 @@
-# ai-pr-collision-lab
+# AI PR Collision Lab
 
-> **Historical hosted demo.** The project-hosted Veripsa GitHub App has been
-> suspended since **2026-08-18**. Installing the App will not currently produce
-> checks or comments. The recording below documents the historical workflow.
-> You can still run this fixture locally; for local signal
-> evaluation, see [Veripsa Core offline evaluation](https://github.com/RollNuts/veripsa#offline-evaluation).
+[![Fixture tests](https://github.com/RollNuts/ai-pr-collision-lab/actions/workflows/fixtures.yml/badge.svg)](https://github.com/RollNuts/ai-pr-collision-lab/actions/workflows/fixtures.yml)
 
-A small Python order-pricing service used for a historical Veripsa demo of two
-pull requests that overlap in the same pricing code. The recording shows the
-past GitHub check and comment; local tests let you inspect the fixture today.
+A small Python order-pricing fixture showing how two individually passing
+changes can overlap in the same code. Run five local tests, inspect the scenario
+manifest, or watch the historical GitHub check recording below.
 
-## Start here
-
-| Need | Link |
-| --- | --- |
-| Run the pricing tests | [Run locally](#run-locally) |
-| Reproduce the prepared scenarios | [Current canonical fixture guidance](#reproduce-both-scenarios) |
-| Historical check and comment recording | [Recorded public run](#recorded-public-run) |
-| This fork's legacy fixture manifest | [`demo-manifest.json`](./demo-manifest.json) |
-| Public integration contract v1.0.0 | <https://github.com/GetVeripsa/veripsa-webhook-spec/tree/v1.0.0> |
-| Data handling and retention | [`DATA_HANDLING.md`](./DATA_HANDLING.md) |
-
-## What is in this repository
-
-- `orders/pricing.py` — order totals; both prepared scenarios edit it.
-- `orders/catalog.py` — a tiny in-memory product catalog.
-- `tests/test_pricing.py` — plain pytest tests.
-- `demo-manifest.json` — the machine-readable authority for fixture branches,
-  their shared base, expected changed paths, tests, recorded-run metadata, and
-  compatible public-contract version.
-- `scripts/verify_fixtures.py` — the legacy verifier for the scenario branches;
-  those branch refs are not included in this fork.
-
-Two historical scenario branches (see [current reproduction guidance](#reproduce-both-scenarios)):
-
-| Branch | Pretend author | Purpose |
-| --- | --- | --- |
-| `collide-a` | Agent A | Add a bulk discount inside calculate_total. |
-| `collide-b` | Agent B | Add a large-cart discount in the same pricing area. |
-
-Each branch is small and passes its tests independently. Both must keep the
-recorded fixture base
-`03f70bef401b65e0c275c8b34cf9fc6d83f85379`, and each must differ from it only
-in `orders/pricing.py` and `tests/test_pricing.py`. The legacy verifier checks those invariants when both branch refs are present;
-README prose is not the fixture authority.
-
-## Recorded public run
-
-![A Veripsa comment shows two open PRs, then updates after the leading PR merges](./media/veripsa-two-prs-before-after.gif)
-
-The real public run was captured on **2026-07-16** at commit
-[`03f70bef401b65e0c275c8b34cf9fc6d83f85379`](https://github.com/GetVeripsa/ai-pr-collision-lab/commit/03f70bef401b65e0c275c8b34cf9fc6d83f85379),
-compatible with public contract **v1.0.0**:
-
-- [PR #1](https://github.com/GetVeripsa/ai-pr-collision-lab/pull/1) held the
-  earlier position while PR #2 was open.
-- [PR #2](https://github.com/GetVeripsa/ai-pr-collision-lab/pull/2) updated after
-  the earlier PR landed.
-- A compact [MP4 version](./media/veripsa-two-prs-before-after.mp4) is included
-  for social posts and presentations.
-- Immutable media links: [GIF](https://github.com/GetVeripsa/ai-pr-collision-lab/raw/03f70bef401b65e0c275c8b34cf9fc6d83f85379/media/veripsa-two-prs-before-after.gif)
-  and [MP4](https://github.com/GetVeripsa/ai-pr-collision-lab/raw/03f70bef401b65e0c275c8b34cf9fc6d83f85379/media/veripsa-two-prs-before-after.mp4).
-
-This is a historical capture of the visible GitHub workflow, not a frozen copy
-contract. Human sentence copy may evolve. Integrations should consume the
-current machine contract instead of parsing prose from the recording. The
-capture does not assert that either change is correct or safe to merge.
+> **Historical demo:** This repository originated as a fork of
+> `GetVeripsa/ai-pr-collision-lab`. Its upstream is now private. The project-hosted
+> Veripsa GitHub App has been suspended since **2026-08-18**; installing it will
+> not currently produce checks or comments. The local fixture runs without an App.
 
 ## Run locally
 
-This is a historical fork. Its `main` branch has the small pricing service and
-unit tests, but does not contain the scenario branches or the newer fixture
-materializer. To run the service tests without installing a GitHub App:
+Requires Python 3.9 or later.
 
 ```sh
+git clone https://github.com/RollNuts/ai-pr-collision-lab.git
+cd ai-pr-collision-lab
 python3 -m venv .venv
 . .venv/bin/activate
 python3 -m pip install -e '.[test]'
@@ -81,32 +25,58 @@ python3 -m pytest -q
 python3 scripts/check_docs.py
 ```
 
-The pricing tests exercise the local Python fixture. They do not produce a
-Veripsa check or validate the hosted service.
+The CI badge covers this repository’s pricing tests and documentation checks.
+It does not validate the absent scenario branches or the hosted App. Forking,
+cloning, and testing this static project sends nothing to Veripsa; see
+[data handling](./DATA_HANDLING.md).
 
-## Reproduce both scenarios
+## What the fixture demonstrates
 
-The canonical repository has moved from long-lived `collide-a` / `collide-b`
-branches to the annotated tags `fixture-v1-agent-a` / `fixture-v1-agent-b`.
-Its newer manifest and scripts verify the tags and materialize scenario branches
-in a fork you control. Use the
-[canonical scenario instructions](https://github.com/GetVeripsa/ai-pr-collision-lab#the-two-prepared-scenarios)
-and [materializer](https://github.com/GetVeripsa/ai-pr-collision-lab/blob/main/scripts/materialize_fixtures.py)
-from a fresh clone of that repository. The legacy `scripts/verify_fixtures.py`
-in this fork expects the old branch names and cannot verify scenarios that are
-absent here. Do not delete a fork to try to restore those removed branches.
+Both historical scenarios change `orders/pricing.py` and
+`tests/test_pricing.py`. Each was designed to pass its tests independently:
 
-The hosted installation and check-rendering steps in older walkthroughs are
-historical while the service remains suspended. Local fixture tests and tag
-verification remain useful without an App installation. For evaluating the
-structural signal on your own repository, use
+| Historical branch | Pretend author | Purpose |
+| --- | --- | --- |
+| `collide-a` | Agent A | Add a bulk discount inside calculate_total. |
+| `collide-b` | Agent B | Add a large-cart discount in the same pricing area. |
+
+The shared fixture base is `03f70bef401b65e0c275c8b34cf9fc6d83f85379`.
+[`demo-manifest.json`](./demo-manifest.json) preserves the branch names, base,
+expected paths, test commands, recorded-run metadata, and compatible historical
+public-contract version **1.0.0**. [`AGENTS.md`](./AGENTS.md) records how agents
+were expected to interpret the advisory states.
+
+The `collide-a` and `collide-b` branch refs are not included in this repository.
+The legacy [`scripts/verify_fixtures.py`](./scripts/verify_fixtures.py) therefore
+cannot reproduce or verify both scenarios from a fresh clone. The available
+local quickstart tests the pricing service on `main`; CI intentionally runs
+those tests and manifest/document parity checks only.
+
+For evaluating structural signals on your own repository, see
 [Veripsa Core offline evaluation](https://github.com/RollNuts/veripsa#offline-evaluation).
 
-Forking, cloning, and testing this static repository sends nothing to Veripsa.
-[`DATA_HANDLING.md`](./DATA_HANDLING.md) documents the historical App data
-boundary; it is not an availability notice for a hosted service.
+## Historical recording
+
+![A Veripsa comment shows two open PRs, then updates after the leading PR merges](./media/veripsa-two-prs-before-after.gif)
+
+The public run was captured on **2026-07-16** at commit
+`03f70bef401b65e0c275c8b34cf9fc6d83f85379`, compatible with historical public
+contract **v1.0.0**. PR #1 held the earlier position while PR #2 was open; the
+comment on PR #2 updated after the earlier PR landed.
+
+A compact [MP4 version](./media/veripsa-two-prs-before-after.mp4) is also included.
+The recording preserves the past GitHub workflow. It does not assert that either
+change was correct or safe to merge, and it does not demonstrate a currently
+available hosted service.
+
+## Repository map
+
+- [`orders/pricing.py`](./orders/pricing.py) — order totals.
+- [`orders/catalog.py`](./orders/catalog.py) — tiny in-memory product catalog.
+- [`tests/test_pricing.py`](./tests/test_pricing.py) — local pricing tests.
+- [`scripts/check_docs.py`](./scripts/check_docs.py) — checks README and agent
+  guidance against the manifest.
 
 ## License
 
-The code and documentation in this lab are available under the
-[MIT License](./LICENSE).
+The code and documentation are available under the [MIT License](./LICENSE).
